@@ -1,1 +1,130 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Français avec Tassnim</title>
+<style>
+body{margin:0;background:#fff0f6;font-family:Arial;text-align:center;color:#49334b}
+header{background:linear-gradient(120deg,#f16ba9,#9d79e8);color:white;padding:28px 10px;border-radius:0 0 25px 25px}
+main{max-width:650px;margin:auto;padding:12px}
+.card{background:white;margin:15px 0;padding:20px;border-radius:20px;box-shadow:0 3px 12px #e8c9df}
+h2{color:#d94f96}
+button,select{background:#e86ca8;color:white;border:0;border-radius:12px;padding:12px;margin:6px;font-size:16px}
+button{cursor:pointer}
+.word{font-size:27px;color:#9861c5;font-weight:bold;padding:12px}
+.answer{display:block;width:85%;margin:10px auto;background:#8b73d5}
+#result{font-weight:bold;color:#d94f96}
+</style>
+</head>
+<body>
+<header>
+<h1>🌸 Français avec Tassnim 🌸</h1>
+<p>تعلمي الفرنسية بطريقة ممتعة وسهلة</p>
+<p>Bienvenue ! أهلاً بكِ</p>
+</header>
+<main>
+<div class="card">
+<h2>📚 اختاري مستواك</h2>
+<select id="level" onchange="changeLevel()">
+<option value="beginner">المبتدئ</option>
+<option value="middle">المتوسط</option>
+<option value="advanced">المتقدم</option>
+</select>
+<p id="levelText">مرحباً بكِ في المستوى المبتدئ!</p>
+</div>
+
+<div class="card">
+<h2>📖 درس الكلمات الفرنسية</h2>
+<div class="word" id="french">Bonjour</div>
+<p id="arabic">مرحباً / صباح الخير</p>
+<button onclick="speak()">🔊 استمعي إلى النطق</button>
+<button onclick="nextWord()">الكلمة التالية ➜</button>
+</div>
+
+<div class="card">
+<h2>✏️ اختبري معلوماتك</h2>
+<p id="question">ما معنى Bonjour؟</p>
+<button class="answer" onclick="check(0)">مرحباً</button>
+<button class="answer" onclick="check(1)">إلى اللقاء</button>
+<button class="answer" onclick="check(2)">شكراً</button>
+<p id="result"></p>
+</div>
+
+<div class="card">
+<h2>🎤 تدربي على النطق</h2>
+<p>سجلي صوتك ثم استمعي إليه.</p>
+<button onclick="record()">🎙️ بدء التسجيل</button>
+<button onclick="stopRecord()">⏹️ إيقاف التسجيل</button>
+<p id="status">لم يبدأ التسجيل بعد.</p>
+<audio id="audio" controls style="display:none;width:100%"></audio>
+</div>
+
+<div class="card">
+<h2>💖 نصيحة تسنيم</h2>
+<p>تعلمي كلمات جديدة كل يوم ولا تخافي من الأخطاء. أنتِ قادرة على النجاح!</p>
+</div>
+</main>
+<footer>🌷 Français avec Tassnim 🌷</footer>
+<script>
+const words=[
+["Bonjour","مرحباً / صباح الخير"],
+["Merci","شكراً"],
+["Au revoir","إلى اللقاء"],
+["Bonsoir","مساء الخير"],
+["S'il vous plaît","من فضلك"],
+["Comment allez-vous ?","كيف حالك؟"],
+["Je m'appelle","اسمي"],
+["Je suis heureuse","أنا سعيدة"]
+];
+let i=0;
+function nextWord(){
+i=(i+1)%words.length;
+document.getElementById("french").textContent=words[i][0];
+document.getElementById("arabic").textContent=words[i][1];
+}
+function speak(){
+if(!window.speechSynthesis){alert("النطق غير مدعوم");return;}
+speechSynthesis.cancel();
+let m=new SpeechSynthesisUtterance(words[i][0]);
+m.lang="fr-FR";m.rate=.85;
+speechSynthesis.speak(m);
+}
+function changeLevel(){
+let v=document.getElementById("level").value;
+let t={beginner:"مرحباً بكِ في المستوى المبتدئ!",middle:"أهلاً بكِ في المستوى المتوسط!",advanced:"مرحباً بكِ في المستوى المتقدم!"};
+document.getElementById("levelText").textContent=t[v];
+}
+function check(n){
+document.getElementById("result").textContent=n===0?"👏 أحسنتِ! إجابة صحيحة.":"حاولي مرة أخرى ❤️";
+}
+let recorder,stream;
+async function record(){
+try{
+stream=await navigator.mediaDevices.getUserMedia({audio:true});
+recorder=new MediaRecorder(stream);
+let parts=[];
+recorder.ondataavailable=e=>parts.push(e.data);
+recorder.onstop=()=>{
+let url=URL.createObjectURL(new Blob(parts,{type:"audio/webm"}));
+let a=document.getElementById("audio");a.src=url;a.style.display="block";
+stream.getTracks().forEach(t=>t.stop());
+};
+recorder.start();
+document.getElementById("status").textContent="🔴 التسجيل جارٍ...";
+}catch(e){
+document.getElementById("status").textContent="تعذر تشغيل الميكروفون. تحققي من الإذن.";
+}
+}
+function stopRecord(){
+if(recorder&&recorder.state==="recording"){
+recorder.stop();
+document.getElementById("status").textContent="تم التسجيل! استمعي إلى صوتك.";
+}else{
+document.getElementById("status").textContent="ابدئي التسجيل أولاً.";
+}
+}
+</script>
+</body>
+</html>
